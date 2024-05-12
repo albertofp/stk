@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
+	"slices"
 
 	"gopkg.in/gomail.v2"
 )
@@ -16,6 +18,11 @@ func main() {
 	fileName := fmt.Sprintf("%s/%s", cwd, os.Args[1])
 	if fileName == "" {
 		fmt.Println("Please provide a file")
+		os.Exit(1)
+	}
+	supportedFormats := []string{".mobi", ".pdf", ".epub", ".azw3", ".txt", ".html"}
+	if !slices.Contains(supportedFormats, filepath.Ext(fileName)) {
+		fmt.Println("Unsupported file format.\n Supported formats: ", supportedFormats)
 		os.Exit(1)
 	}
 	sender := "albertopluecker@gmail.com"
