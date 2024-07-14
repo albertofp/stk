@@ -5,6 +5,8 @@ package utils
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
@@ -64,9 +66,9 @@ func (m model) View() string {
 	if m.err != nil {
 		return m.err.Error()
 	}
-	str := fmt.Sprintf("\n\n   %s Sending email...press q to quit\n\n", m.spinner.View())
+	str := fmt.Sprintf("\n\n   %s Sending %s to Kindle.. press q to quit\n\n", m.spinner.View(), filepath.Base(os.Args[1]))
 	if m.quitting {
-		return str + "\n"
+		return "\n"
 	}
 	return str
 }
@@ -84,6 +86,6 @@ func WithSpinner(fn func() error) error {
 	if _, err := p.Run(); err != nil {
 		return err
 	}
-	fmt.Println()
+
 	return <-errs
 }
