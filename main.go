@@ -61,15 +61,29 @@ func sendMail(cfg Config) error {
 	_ = m.From(cfg.sender)
 	_ = m.To(cfg.receiver)
 	m.Subject(fmt.Sprintf("Book sent to Kindle: %s", filepath.Base(cfg.fileName)))
+	if err := checkFileSize(cfg.fileName); err != nil {
+		return err
+	}
 	m.AttachFile(cfg.fileName)
 
-	d, err := mail.NewClient(cfg.host, mail.WithPort(587), mail.WithSMTPAuth(mail.SMTPAuthPlain), mail.WithUsername(cfg.sender), mail.WithPassword(cfg.password))
+	d, err := mail.NewClient(cfg.host, mail.WithPort(25), mail.WithSMTPAuth(mail.SMTPAuthPlain), mail.WithUsername(cfg.sender), mail.WithPassword(cfg.password))
 	if err != nil {
 		return err
 	}
 
 	if err := d.DialAndSend(m); err != nil {
 		return err
+	}
+	return nil
+}
+
+func checkFileSize(fileName string) error {
+	file, err := os.Stat(fileName)
+	if err != nil {
+		return err
+	}
+	if file.Size() > 25*1024*1024 {
+		return fmt.Errorf("file size has to be smaller than 25Mb")
 	}
 	return nil
 }
