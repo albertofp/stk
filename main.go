@@ -8,7 +8,17 @@ import (
 	"slices"
 
 	"gopkg.in/gomail.v2"
+
+	"github.com/albertofp/stk/utils"
 )
+
+type Config struct {
+	sender   string
+	receiver string
+	fileName string
+	password string
+	host     string
+}
 
 func main() {
 	cwd, err := os.Getwd()
@@ -25,23 +35,38 @@ func main() {
 		fmt.Println("Unsupported file format.\n Supported formats: ", supportedFormats)
 		os.Exit(1)
 	}
-	sender := "albertopluecker@gmail.com"
-	receiver := "kFrjSBVr5BNtbd@kindle.com"
 	password := os.Getenv("STK_PWD")
 	if password == "" {
 		log.Fatal("STK_PWD not set")
 	}
-	host := "smtp.gmail.com"
 
+	cfg := Config{
+		sender:   "albertopluecker@gmail.com",
+		receiver: "kFrjSBVr5BNtbd@kindle.com",
+		fileName: fileName,
+		password: password,
+		host:     "smtp.gmail.com",
+	}
+	err = utils.WithSpinner(func() error {
+		return sendMail(cfg)
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println("Book sent!")
+}
+
+func sendMail(cfg Config) error {
 	m := gomail.NewMessage()
-	m.SetHeader("From", sender)
-	m.SetHeader("To", receiver)
+	m.SetHeader("From", cfg.sender)
+	m.SetHeader("To", cfg.receiver)
 	m.SetHeader("Subject", "Book sent to Kindle: "+os.Args[1])
-	m.Attach(fileName)
+	m.Attach(cfg.fileName)
 
-	d := gomail.NewDialer(host, 587, sender, password)
+	d := gomail.NewDialer(cfg.host, 587, cfg.sender, cfg.password)
 
 	if err := d.DialAndSend(m); err != nil {
-		panic(err)
+		return err
 	}
+	return nil
 }
