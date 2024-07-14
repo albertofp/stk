@@ -84,6 +84,6 @@ func WithSpinner(fn func() error) error {
 	if _, err := p.Run(); err != nil {
 		return err
 	}
-
+	fmt.Println()
 	return <-errs
 }

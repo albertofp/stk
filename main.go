@@ -51,7 +51,7 @@ func main() {
 		return sendMail(cfg)
 	})
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("Error: ", err)
 	}
 	fmt.Println("Book sent!")
 }
