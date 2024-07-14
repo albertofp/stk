@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
+	"strings"
 
 	"github.com/wneessen/go-mail"
 
@@ -31,7 +32,7 @@ func main() {
 		os.Exit(1)
 	}
 	supportedFormats := []string{".mobi", ".pdf", ".epub", ".azw3", ".txt", ".html"}
-	if !slices.Contains(supportedFormats, filepath.Ext(fileName)) {
+	if !slices.Contains(supportedFormats, strings.ToLower(filepath.Ext(fileName))) {
 		fmt.Println("Unsupported file format.\n Supported formats: ", supportedFormats)
 		os.Exit(1)
 	}
