@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"slices"
 
-	"gopkg.in/gomail.v2"
+	"github.com/wneessen/go-mail"
 
 	"github.com/albertofp/stk/utils"
 )
@@ -25,7 +25,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fileName := fmt.Sprintf("%s/%s", cwd, os.Args[1])
+	fileName := filepath.Join(cwd, os.Args[1])
 	if fileName == "" {
 		fmt.Println("Please provide a file")
 		os.Exit(1)
@@ -57,13 +57,16 @@ func main() {
 }
 
 func sendMail(cfg Config) error {
-	m := gomail.NewMessage()
-	m.SetHeader("From", cfg.sender)
-	m.SetHeader("To", cfg.receiver)
-	m.SetHeader("Subject", "Book sent to Kindle: "+os.Args[1])
-	m.Attach(cfg.fileName)
+	m := mail.NewMsg()
+	_ = m.From(cfg.sender)
+	_ = m.To(cfg.receiver)
+	m.Subject(fmt.Sprintf("Book sent to Kindle: %s", filepath.Base(cfg.fileName)))
+	m.AttachFile(cfg.fileName)
 
-	d := gomail.NewDialer(cfg.host, 587, cfg.sender, cfg.password)
+	d, err := mail.NewClient(cfg.host, mail.WithPort(587), mail.WithSMTPAuth(mail.SMTPAuthPlain), mail.WithUsername(cfg.sender), mail.WithPassword(cfg.password))
+	if err != nil {
+		return err
+	}
 
 	if err := d.DialAndSend(m); err != nil {
 		return err
